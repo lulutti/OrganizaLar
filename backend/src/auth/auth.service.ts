@@ -49,7 +49,6 @@ export class AuthService {
     }
 
     const isAnswerCorrect = await user.compareAnswer(secretAnswer);
-    console.log(user);
     if (!isAnswerCorrect) {
       throw new UnauthorizedException('Invalid secret answer');
     }
