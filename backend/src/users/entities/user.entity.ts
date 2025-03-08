@@ -1,33 +1,61 @@
-import { Contributor } from "src/contributors/entities/contributor.entity";
-import { Room } from "src/rooms/entities/room.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Contributor } from 'src/contributors/entities/contributor.entity';
+import { Room } from 'src/rooms/entities/room.entity';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column({ unique: true  })
-    email: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column()
-    password: string;
+  @Column()
+  password: string;
 
-    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-    createdAt: Date;
+  @Column()
+  secretQuestion: string;
 
-    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updatedAt: Date;
+  @Column()
+  secretAnswer: string;
 
-    @Column({ default: false })
-    isAdmin: boolean;
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-    @OneToMany(() => Room, room => room.userId)
-    rooms: Room[];
+  @Column({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
 
-    @OneToMany(() => Contributor, (contributor) => contributor.userId)
-    contributors: Contributor[];
+  @Column({ default: true })
+  isAdmin: boolean;
+
+  @OneToMany(() => Room, (room) => room.userId)
+  rooms: Room[];
+
+  @OneToMany(() => Contributor, (contributor) => contributor.userId)
+  contributors: Contributor[];
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+    this.secretAnswer = await bcrypt.hash(this.password, 10);
+  }
+
+  async comparePassword(password: string): Promise<boolean> {
+    console.log(password, this.password);
+    return bcrypt.compare(password, this.password);
+  }
 }
