@@ -2,6 +2,7 @@ import { Contributor } from 'src/contributors/entities/contributor.entity';
 import { Room } from 'src/rooms/entities/room.entity';
 import {
   BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
   OneToMany,
@@ -49,13 +50,17 @@ export class User {
   contributors: Contributor[];
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
-    this.secretAnswer = await bcrypt.hash(this.password, 10);
+    this.secretAnswer = await bcrypt.hash(this.secretAnswer, 10);
   }
 
   async comparePassword(password: string): Promise<boolean> {
-    console.log(password, this.password);
     return bcrypt.compare(password, this.password);
+  }
+
+  async compareAnswer(secretAnswer: string): Promise<boolean> {
+    return bcrypt.compare(secretAnswer, this.secretAnswer);
   }
 }
