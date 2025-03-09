@@ -1,0 +1,49 @@
+.container {    
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  align-items: center;
+  justify-items: center;
+  height: 100vh; 
+  }
+  
+  .illustration {
+    background-color: #f6f6ff;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .illustration image {
+    align-self: center;
+    text-align: center;
+  }
+
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 330px;
+    box-sizing: content-box;
+    padding: 24px 24px;
+  }
+
+  .linkContainer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  #title {
+    margin-bottom: 8px;
+  }
