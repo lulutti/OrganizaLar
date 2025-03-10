@@ -25,25 +25,15 @@ export default function ForgotPasswordPage() {
     try {
       switch (state) {
         case ForgotPasswordState.RequestEmail:
-          // Endpoint X: Enviar email e obter a pergunta secreta
-          // Aqui você vai chamar o endpoint para enviar o e-mail e obter a pergunta secreta
-          console.log('Solicitar e-mail e pergunta secreta');
-          setState(ForgotPasswordState.AnswerSecurityQuestion); // Se deu certo, muda para o próximo estado
+          setState(ForgotPasswordState.AnswerSecurityQuestion);
           break;
 
         case ForgotPasswordState.AnswerSecurityQuestion:
-          // Endpoint Y: Enviar a resposta da pergunta secreta
-          // Aqui você vai chamar o endpoint para verificar a resposta da pergunta secreta
-          console.log('Verificar resposta da pergunta secreta');
-          setState(ForgotPasswordState.ResetPassword); // Se a resposta for correta, vai para o reset de senha
+          setState(ForgotPasswordState.ResetPassword);
           break;
 
         case ForgotPasswordState.ResetPassword:
-          // Endpoint Z: Atualizar a senha
-          // Aqui você vai chamar o endpoint para atualizar a senha
-          console.log('Atualizar senha');
-          // Após atualização, você pode redirecionar para o signin
-          window.location.href = '/auth/signin'; // Redireciona para a página de login
+          window.location.href = '/auth/signin';
           break;
       }
     } catch (error) {
