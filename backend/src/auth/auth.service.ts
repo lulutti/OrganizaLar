@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -9,7 +12,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async signIn(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOneByEmail(email);
@@ -60,5 +63,19 @@ export class AuthService {
         expiresIn: '5m',
       }),
     };
+  }
+
+  async validateToken(token: string): Promise<string | null> {
+    try {
+      const decoded = await this.jwtService.verify(token, {
+        secret: jwtConstants.secret,
+      });
+      const userId = decoded.sub;
+
+      return userId;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 }

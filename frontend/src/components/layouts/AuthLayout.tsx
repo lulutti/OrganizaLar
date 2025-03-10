@@ -17,7 +17,7 @@ interface AuthLayoutProps {
     submitButton: string;
     description?: string;
     loading?: boolean;
-    links?: any[]; //
+    links?: any[];
 }
 
 export default function AuthLayout({ title, children, handleSubmit, description, submitButton, loading = false, links = [] }: AuthLayoutProps) {

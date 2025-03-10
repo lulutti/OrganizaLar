@@ -6,7 +6,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -20,5 +20,16 @@ export class AuthController {
   @Public()
   forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Public()
+  @Post('validate-token')
+  async validateToken(@Body('token') token: string) {
+    const userId = await this.authService.validateToken(token);
+    if (userId !== null) {
+      return { userId };
+    } else {
+      throw new Error('Token inválido');
+    }
   }
 }
