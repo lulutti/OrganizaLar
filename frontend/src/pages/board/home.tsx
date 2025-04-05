@@ -7,6 +7,7 @@ import { Room, roomsAPI } from "@/services/roomsApi";
 import { jwtDecode } from "jwt-decode";
 import styles from "@/styles/Home.module.css";
 import { authAPI } from "@/services/authAPI";
+import Link from "next/link";
 const { Title } = Typography;
 const { Content } = Layout;
 
@@ -33,15 +34,16 @@ const HomePage = () => {
             if (!token) {
                 router.push("/auth/signin");
             } else {
-                validateToken(token);
-
+                validateToken(token);             
             }
         }
 
         if (userId && data.length === 0) { fetchRooms(); }
     }, [data.length, isTokenValid, router, userId]);
 
+    
     const validateToken = async (token: string) => {
+        try {
         const { isValid, userId } = await authAPI.validateToken(token);
 
         if (isValid) {
@@ -51,6 +53,10 @@ const HomePage = () => {
             setLoading(false);
         } else {
             setIsTokenValid(false);
+        }} catch (error) {
+            message.error("Token inválido.");
+            sessionStorage.removeItem("access_token");
+            router.push("/auth/signin");
         }
     };
 
@@ -154,7 +160,7 @@ const HomePage = () => {
                                             onKeyDown={(e) => handleKeyPress(e, index, item.name)}
                                         />
                                     ) : (
-                                        <a href="/">{item.name}</a>
+                                        <Link href="/">{item.name}</Link>
                                     )
                                 }
                             />

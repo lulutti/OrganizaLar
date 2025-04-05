@@ -1,0 +1,15 @@
+.loadingContent {
+    padding: 0 50px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .editableCellWrapper {
+    padding-inline-end: 24px;
+  }
+  
+  .noMarginFormItem {
+    margin: 0;
+  }
