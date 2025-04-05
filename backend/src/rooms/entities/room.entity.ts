@@ -1,9 +1,11 @@
+import { Task } from 'src/tasks/entities/task.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -24,4 +26,7 @@ export class Room {
 
   @Column()
   userId: string;
+
+  @OneToMany(() => Task, (task) => task.room)
+  tasks: Task[];
 }

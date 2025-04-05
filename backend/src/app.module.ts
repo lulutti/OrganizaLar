@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ContributorsModule } from './contributors/contributors.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
+import { TasksModule } from './tasks/tasks.module';
 import typeorm from './config/typeorm';
 
 @Module({
@@ -23,14 +24,15 @@ import typeorm from './config/typeorm';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
         migrationsRun: true,
-        migrations: ["dist/migrations/*{.ts,.js}"],
+        migrations: ['dist/migrations/*{.ts,.js}'],
         autoLoadEntities: true,
       }),
     }),
     UsersModule,
     ContributorsModule,
     RoomsModule,
-    AuthModule, 
+    AuthModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

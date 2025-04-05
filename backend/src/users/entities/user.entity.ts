@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Task } from 'src/tasks/entities/task.entity';
 
 @Entity()
 export class User {
@@ -48,6 +49,9 @@ export class User {
 
   @OneToMany(() => Contributor, (contributor) => contributor.userId)
   contributors: Contributor[];
+
+  @OneToMany(() => Task, (task) => task.user)
+  tasks: Task[];
 
   @BeforeInsert()
   @BeforeUpdate()
