@@ -132,7 +132,7 @@ const HomePage = () => {
 
     return (
         <BoardLayout title="Gerenciar espaço">
-            <Card title="Comôdos" extra={<Button onClick={handleAddItem}>Adicionar</Button>}>
+            <Card title="Cômodos" extra={<Button onClick={handleAddItem}>Adicionar</Button>}>
                 <List
                     itemLayout="horizontal"
                     dataSource={data}
