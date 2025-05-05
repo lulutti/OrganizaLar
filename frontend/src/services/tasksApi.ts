@@ -1,11 +1,6 @@
 import api from "./api"; // Importa a instância do Axios
 import { Room } from "./roomsApi";
-
-export enum TaskStatus {
-    PENDING = 'pending',
-    IN_PROGRESS = 'in_progress',
-    DONE = 'done',
-  }
+import { ScheduleTaskStatus } from "./scheduleAPI";
 
 export interface Task {
     id: string;
@@ -14,7 +9,7 @@ export interface Task {
     roomId?: string;
     lastTimeDone?: Date;
     planned?: boolean;
-    status?: TaskStatus;
+    status?: ScheduleTaskStatus;
     room?: Room;
 }
 

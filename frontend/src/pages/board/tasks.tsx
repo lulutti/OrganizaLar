@@ -105,22 +105,11 @@ const TasksPage = () => {
       key: "name",
     },
     {
-      title: "Planejada",
-      dataIndex: "planned",
-      key: "planned",
-      render: (planned: boolean) => (planned ? "Sim" : "Não"),
-    },
-    {
       title: "Última realização",
       dataIndex: "last_time_done",
       key: "last_time_done",
       render: (date: string | null) =>
         date ? new Date(date).toLocaleDateString() : "—",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
     },
     {
       title: "Ações",
@@ -290,7 +279,6 @@ const TasksPage = () => {
               <Table
                 components={components}
                 rowClassName={() => "editable-row"}
-                bordered
                 dataSource={tasksForRoom}
                 columns={editableColumns}
                 rowKey="id"

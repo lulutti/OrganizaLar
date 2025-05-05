@@ -35,7 +35,8 @@ function getItem(
 
 const items: MenuItem[] = [
     getItem('Gerenciar espaço', '/board/home', <HomeFilled />),
-    getItem('Tarefas', '/board/tasks', <ProfileFilled />)
+    getItem('Tarefas', '/board/tasks', <ProfileFilled />),
+    getItem('Planejamento', '/board/cleaning-planning', <ProfileFilled />)
 ];
 
 
