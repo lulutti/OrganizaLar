@@ -1,4 +1,4 @@
-import { Task } from 'src/tasks/entities/task.entity';
+import { CleaningScheduleTask } from 'src/cleaning-schedule/entities/cleaning-schedule-task.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -24,6 +24,6 @@ export class Contributor {
   @Column()
   userId: string;
 
-  @OneToMany(() => Task, (task) => task.assigned_to)
-  assigned_tasks: Task[];
+  @OneToMany(() => CleaningScheduleTask, (task) => task.assigned_to)
+  assigned_tasks: CleaningScheduleTask[];
 }

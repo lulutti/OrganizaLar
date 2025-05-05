@@ -11,7 +11,6 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskStatus } from './entities/task.entity';
 
 @Controller('tasks')
 export class TasksController {
@@ -26,13 +25,11 @@ export class TasksController {
     @Param('userId') userId: string,
     @Query('roomId') roomId?: string,
     @Query('assignedId') assignedId?: string,
-    @Query('status') status?: TaskStatus,
     @Query('lastTimeDone') lastTimeDone?: string,
   ) {
     return await this.tasksService.findAllByUser(userId, {
       roomId,
       assignedId,
-      status,
       lastTimeDone,
     });
   }

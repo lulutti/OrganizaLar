@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Task } from 'src/tasks/entities/task.entity';
+import { CleaningSchedule } from 'src/cleaning-schedule/entities/cleaning-schedule.entity';
 
 @Entity()
 export class User {
@@ -52,6 +53,9 @@ export class User {
 
   @OneToMany(() => Task, (task) => task.user)
   tasks: Task[];
+
+  @OneToMany(() => CleaningSchedule, (schedule) => schedule.user)
+  cleaningSchedules: CleaningSchedule[];
 
   @BeforeInsert()
   @BeforeUpdate()

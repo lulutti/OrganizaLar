@@ -1,5 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
-import { TaskStatus } from '../entities/task.entity';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -14,9 +13,6 @@ export class CreateTaskDto {
 
   @IsBoolean()
   planned: boolean;
-
-  @IsEnum(TaskStatus)
-  status: TaskStatus;
 
   @IsString()
   userId: string;

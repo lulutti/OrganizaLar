@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Task, TaskStatus } from './entities/task.entity';
+import { Task } from './entities/task.entity';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { UsersService } from 'src/users/users.service';
 
@@ -37,7 +37,6 @@ export class TasksService {
     filters: {
       roomId?: string;
       assignedId?: string;
-      status?: TaskStatus;
       lastTimeDone?: string;
     },
   ): Promise<Task[]> {
@@ -45,7 +44,6 @@ export class TasksService {
       user: { id: userId },
       ...(filters.roomId && { room: { id: filters.roomId } }),
       ...(filters.assignedId && { assignedId: { id: filters.assignedId } }),
-      ...(filters.status && { status: filters.status }),
       ...(filters.lastTimeDone && {
         last_time_done: new Date(filters.lastTimeDone),
       }),

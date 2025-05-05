@@ -6,6 +6,7 @@ import { ContributorsModule } from './contributors/contributors.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
 import { TasksModule } from './tasks/tasks.module';
+import { CleaningScheduleModule } from './cleaning-schedule/cleaning-schedule.module';
 import typeorm from './config/typeorm';
 
 @Module({
@@ -33,6 +34,7 @@ import typeorm from './config/typeorm';
     RoomsModule,
     AuthModule,
     TasksModule,
+    CleaningScheduleModule,
   ],
 })
 export class AppModule {}
