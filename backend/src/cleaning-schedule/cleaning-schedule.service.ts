@@ -12,6 +12,7 @@ import {
   ScheduleTaskStatus,
 } from 'src/cleaning-schedule/entities/cleaning-schedule-task.entity';
 import { UsersService } from 'src/users/users.service';
+import { UpdateCleaningScheduleTaskDto } from './dto/update-cleaning-schedule-task.dto';
 
 @Injectable()
 export class CleaningScheduleService {
@@ -83,11 +84,10 @@ export class CleaningScheduleService {
     schedule.status = status;
     return this.cleaningScheduleRepository.save(schedule);
   }
-
-  async updateTaskStatus(
+  async updateTask(
     cleaningScheduleId: string,
     taskId: string,
-    newStatus: ScheduleTaskStatus,
+    dto: UpdateCleaningScheduleTaskDto,
   ): Promise<CleaningSchedule> {
     return await this.dataSource.transaction(async (manager) => {
       const cleaningSchedule = await manager.findOne(CleaningSchedule, {
@@ -95,7 +95,7 @@ export class CleaningScheduleService {
           id: cleaningScheduleId,
           status: CleaningScheduleStatus.IN_PROGRESS,
         },
-        relations: ['tasks', 'tasks.task'], // importante carregar a task associada!
+        relations: ['tasks', 'tasks.task'],
       });
 
       if (!cleaningSchedule) {
@@ -104,23 +104,34 @@ export class CleaningScheduleService {
 
       const scheduleTask = cleaningSchedule.tasks.find((t) => t.id === taskId);
       if (!scheduleTask) {
-        throw new Error('Task not found');
+        throw new Error('Task not found in this schedule');
       }
 
-      scheduleTask.status = newStatus;
+      if (dto.newStatus) {
+        scheduleTask.status = dto.newStatus;
 
-      if (newStatus === ScheduleTaskStatus.DONE) {
-        scheduleTask.completedAt = new Date();
+        if (dto.newStatus === ScheduleTaskStatus.DONE) {
+          const now = new Date();
+          scheduleTask.completedAt = now;
+          scheduleTask.task.last_time_done = now;
+          await manager.save(Task, scheduleTask.task);
+        }
+      }
 
-        // Atualiza o campo lastTimeDone da Task associada
-        scheduleTask.task.last_time_done = new Date();
-        await manager.save(Task, scheduleTask.task);
+      const { assignedToContributorId, assignedToAdminUserId } = dto;
+
+      if (assignedToContributorId) {
+        scheduleTask.assignedContributorId = assignedToContributorId;
+      } else if (assignedToAdminUserId) {
+        scheduleTask.assignedUserId = assignedToAdminUserId;
       }
 
       await manager.save(CleaningScheduleTask, scheduleTask);
 
-      const allTasksDone = cleaningSchedule.tasks.every(
-        (task) => task.status === ScheduleTaskStatus.DONE,
+      const allTasksDone = cleaningSchedule.tasks.every((task) =>
+        task.id === scheduleTask.id
+          ? dto.newStatus === ScheduleTaskStatus.DONE
+          : task.status === ScheduleTaskStatus.DONE,
       );
 
       if (allTasksDone) {

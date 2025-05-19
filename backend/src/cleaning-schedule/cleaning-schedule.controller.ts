@@ -44,12 +44,11 @@ export class CleaningScheduleController {
   async updateTaskStatus(
     @Body() updateCleaningScheduleTaskDto: UpdateCleaningScheduleTaskDto,
   ): Promise<CleaningSchedule> {
-    const { cleaningScheduleId, taskId, newStatus } =
-      updateCleaningScheduleTaskDto;
-    return await this.cleaningScheduleService.updateTaskStatus(
+    const { cleaningScheduleId, taskId } = updateCleaningScheduleTaskDto;
+    return await this.cleaningScheduleService.updateTask(
       cleaningScheduleId,
       taskId,
-      newStatus,
+      updateCleaningScheduleTaskDto,
     );
   }
 }
