@@ -24,6 +24,6 @@ export class Contributor {
   @Column()
   userId: string;
 
-  @OneToMany(() => CleaningScheduleTask, (task) => task.assigned_to)
-  assigned_tasks: CleaningScheduleTask[];
+  @OneToMany(() => CleaningScheduleTask, (task) => task.assignedContributorId)
+  assignedTasks: CleaningScheduleTask[];
 }

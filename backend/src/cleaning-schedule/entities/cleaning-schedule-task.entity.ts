@@ -1,6 +1,7 @@
 import { CleaningSchedule } from 'src/cleaning-schedule/entities/cleaning-schedule.entity';
 import { Contributor } from 'src/contributors/entities/contributor.entity';
 import { Task } from 'src/tasks/entities/task.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -38,14 +39,22 @@ export class CleaningScheduleTask {
   })
   status: ScheduleTaskStatus;
 
-  @ManyToOne(() => Contributor, (contributor) => contributor.assigned_tasks, {
-    nullable: true,
-  })
-  @JoinColumn({ name: 'assignedId' })
-  assigned_to: Contributor;
-
   @Column({ type: 'timestamptz', nullable: true })
   completedAt: Date | null;
+
+  @ManyToOne(() => Contributor, { nullable: true })
+  @JoinColumn({ name: 'assignedContributorId' })
+  assignedContributor?: Contributor;
+
+  @Column({ nullable: true })
+  assignedContributorId?: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'assignedUserId' })
+  assignedUser?: User;
+
+  @Column({ nullable: true })
+  assignedUserId?: string;
 
   private _previousStatus: ScheduleTaskStatus;
 
