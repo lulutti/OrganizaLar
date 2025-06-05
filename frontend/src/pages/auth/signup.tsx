@@ -25,9 +25,21 @@ export default function SignUpPage() {
     secretQuestion: string;
     secretAnswer: string;
   }) => {
+    const {        name,
+        email,
+        password,
+        secretAnswer,
+        secretQuestion, } = values;
     setLoading(true);
     try {
-      await usersAPI.createUser(values);
+      await usersAPI.createUser({
+        name,
+        email,
+        password,
+        secretAnswer,
+        secretQuestion,
+        isAdmin: true,
+      });
       message.success("Conta criada com sucesso!");
       router.push("/auth/signin");
     } catch (error: any) {

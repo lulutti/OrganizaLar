@@ -6,4 +6,7 @@ export class CreateRoomDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  userId: string;
 }

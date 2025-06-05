@@ -12,7 +12,8 @@ export class CreateTaskDto {
   lastTimeDone?: Date;
 
   @IsBoolean()
-  planned: boolean;
+  @IsOptional()
+  planned?: boolean;
 
   @IsString()
   userId: string;

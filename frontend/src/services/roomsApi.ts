@@ -39,7 +39,7 @@ export const roomsAPI = {
     },
 
     updateRoom: async (updateRoom: Room, accessToken: string): Promise<Room> => {
-        const response = await api.patch(`/rooms/${updateRoom.id}`, updateRoom, {
+        const response = await api.patch(`/rooms/${updateRoom.id}`, { name: updateRoom.name}, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }

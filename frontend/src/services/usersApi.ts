@@ -12,6 +12,7 @@ interface CreateUser {
     password: string;
     secretQuestion: string;
     secretAnswer: string;
+    isAdmin: true;
 }
 
 export const usersAPI = {

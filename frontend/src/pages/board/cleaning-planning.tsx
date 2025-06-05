@@ -15,6 +15,8 @@ import {
   TreeProps,
   Input
 } from "antd";
+import type { DataNode } from 'antd/es/tree';
+
 import React from "react";
 import BoardLayout from "@/components/layouts/BoardLayout";
 import { authAPI } from "@/services/authAPI";
@@ -172,8 +174,8 @@ const CleaningPlanningPage = () => {
     }
   };
 
-  function transformTasksToTreeData(tasks: Task[] | undefined): Tree.TreeDataNode[] {
-    const roomMap: Record<string, Tree.TreeDataNode> = {};
+function transformTasksToTreeData(tasks: Task[] | undefined): DataNode[] {
+    const roomMap: Record<string, DataNode> = {};
 
     tasks?.forEach((task) => {
       const roomId = task?.room?.id || "";

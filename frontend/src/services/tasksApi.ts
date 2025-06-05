@@ -37,7 +37,7 @@ export const tasksAPI = {
     },
 
     updateTask: async (updateTask: Task, accessToken: string): Promise<Task> => {
-        const response = await api.patch(`/tasks/${updateTask.id}`, updateTask, {
+        const response = await api.patch(`/tasks/${updateTask.id}`, { name: updateTask.name}, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
