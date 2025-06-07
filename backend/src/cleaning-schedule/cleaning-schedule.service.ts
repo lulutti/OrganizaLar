@@ -63,11 +63,7 @@ export class CleaningScheduleService {
         user: { id: userId },
         status: CleaningScheduleStatus.IN_PROGRESS,
       },
-      relations: [
-        'tasks', // Já está trazendo as tasks relacionadas à CleaningSchedule
-        'tasks.task', // Agora estamos trazendo a Task associada a cada CleaningScheduleTask
-        'tasks.task.room', // Agora trazemos o Room associado à Task
-      ],
+      relations: ['tasks', 'tasks.task', 'tasks.task.room'],
     });
   }
 
@@ -120,12 +116,8 @@ export class CleaningScheduleService {
 
       const { assignedToContributorId, assignedToAdminUserId } = dto;
 
-      if (assignedToContributorId) {
-        scheduleTask.assignedContributorId = assignedToContributorId;
-      } else if (assignedToAdminUserId) {
-        scheduleTask.assignedUserId = assignedToAdminUserId;
-      }
-
+      scheduleTask.assignedContributorId = assignedToContributorId;
+      scheduleTask.assignedUserId = assignedToAdminUserId;
       await manager.save(CleaningScheduleTask, scheduleTask);
 
       const allTasksDone = cleaningSchedule.tasks.every((task) =>

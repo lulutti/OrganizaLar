@@ -8,168 +8,227 @@ import { jwtDecode } from "jwt-decode";
 import styles from "@/styles/Home.module.css";
 import { authAPI } from "@/services/authAPI";
 import Link from "next/link";
+import { getInitials } from "@/utils/getInitials.utils";
+import { stringToColor } from "@/utils/stringToColor.utils";
+import { Contributor, contributorsAPI } from "@/services/contributorsApi";
 const { Title } = Typography;
 const { Content } = Layout;
 
 interface RoomWithEditing extends Room {
-    isEditing: boolean;
-    userId?: string;
+  isEditing: boolean;
+  userId?: string;
+}
+
+interface ContributorWithEditing extends Contributor {
+  isEditing: boolean;
 }
 
 const HomePage = () => {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-    const [isTokenValid, setIsTokenValid] = useState<boolean | null>(false);
-    const [accessToken, setAccessToken] = useState<string>('');
-    const [userId, setUserId] = useState<string>('');
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(false);
+  const [accessToken, setAccessToken] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
 
+  const [roomsData, setRoomsData] = useState<RoomWithEditing[]>([]);
+  const [contributorsData, setContributorsData] = useState<ContributorWithEditing[]>([]);
 
-    const [data, setData] = useState<RoomWithEditing[]>([]);
-    const [newItem, setNewItem] = useState<string>('');
+  useEffect(() => {
+    const token = sessionStorage.getItem("access_token");
+    if (!isTokenValid) {
+      token ? validateToken(token) : router.push("/auth/signin");
+    }
+    if (userId && roomsData.length === 0) {
+      fetchData();
+    }
+  }, [isTokenValid, userId]);
 
-    useEffect(() => {
-        const token = sessionStorage.getItem("access_token");
+  const validateToken = async (token: string) => {
+    try {
+      const { isValid, userId } = await authAPI.validateToken(token);
+      if (isValid) {
+        setAccessToken(token);
+        setUserId(userId);
+        setIsTokenValid(true);
+      } else {
+        throw new Error("Token inválido");
+      }
+    } catch {
+      message.error("Token inválido.");
+      sessionStorage.removeItem("access_token");
+      router.push("/auth/signin");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!isTokenValid) {
-            if (!token) {
-                router.push("/auth/signin");
-            } else {
-                validateToken(token);             
+  const fetchData = async () => {
+    try {
+      const [roomsRes, contribsRes] = await Promise.all([
+        roomsAPI.getRoomsByUser(userId, accessToken),
+        contributorsAPI.getContributors(accessToken),
+      ]);
+      setRoomsData(roomsRes.map((r) => ({ ...r, isEditing: false })));
+      setContributorsData(contribsRes.map((c) => ({ ...c, isEditing: false })));
+    } catch {
+      message.error("Erro ao buscar dados.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = (type: "room" | "contributor") => {
+    const newItem = {
+      name: "",
+      isEditing: true,
+      id: "newItem",
+      userId,
+    };
+
+    if (type === "room") {
+      setRoomsData([...roomsData, newItem as RoomWithEditing]);
+    } else {
+      setContributorsData([...contributorsData, newItem as ContributorWithEditing]);
+    }
+  };
+
+  const handleEdit = (index: number, type: "room" | "contributor") => {
+    const setter = type === "room" ? setRoomsData : setContributorsData;
+    const data = type === "room" ? roomsData : contributorsData;
+
+    const updated = [...data];
+    updated[index].isEditing = true;
+    setter(updated);
+  };
+
+  const handleSave = async (index: number, newName: string, type: "room" | "contributor") => {
+    const data = type === "room" ? roomsData : contributorsData;
+    const setter = type === "room" ? setRoomsData : setContributorsData;
+
+    const item = { ...data[index], name: newName };
+    try {
+      if (item.id === "newItem") {
+        type === "room"
+          ? await roomsAPI.createRoom({ name: newName, description: "" }, accessToken, userId)
+          : await contributorsAPI.createContributor({ name: newName, userId }, accessToken);
+      } else {
+        type === "room"
+          ? await roomsAPI.updateRoom({ id: item.id, name: newName }, accessToken)
+          : await contributorsAPI.updateContributor(item.id, { name: newName }, accessToken);
+      }
+    } catch {
+      message.error(`Erro ao salvar ${type === "room" ? "cômodo" : "membro"}.`);
+    } finally {
+      fetchData();
+    }
+  };
+
+  const handleDelete = async (index: number, id: string, type: "room" | "contributor") => {
+    try {
+      type === "room"
+        ? await roomsAPI.deleteRoom(id, accessToken)
+        : await contributorsAPI.deleteContributor(id, accessToken);
+      fetchData();
+    } catch {
+      message.error(`Erro ao deletar ${type === "room" ? "cômodo" : "membro"}.`);
+    }
+  };
+
+  const handleBlur = (index: number, newName: string, type: "room" | "contributor") => {
+    handleSave(index, newName, type);
+  };
+
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+    newName: string,
+    type: "room" | "contributor"
+  ) => {
+    if (e.key === "Enter") {
+      handleSave(index, newName, type);
+    }
+  };
+
+  const renderEditableList = (
+    data: (RoomWithEditing | ContributorWithEditing)[],
+    type: "room" | "contributor"
+  ) => (
+    <List
+      itemLayout="horizontal"
+      dataSource={data}
+      renderItem={(item, index) => (
+        <List.Item
+          key={index}
+          actions={
+            item.userId && !item.isEditing
+              ? [
+                  <a key="edit" onClick={() => handleEdit(index, type)}>
+                    <EditOutlined />
+                  </a>,
+                  <a key="delete" onClick={() => handleDelete(index, item.id, type)}>
+                    <DeleteOutlined />
+                  </a>,
+                ]
+              : []
+          }
+        >
+          <List.Item.Meta
+            avatar={
+              <Avatar style={{ backgroundColor: stringToColor(item.name) }}>
+                {getInitials(item.name)}
+              </Avatar>
             }
-        }
-
-        if (userId && data.length === 0) { fetchRooms(); }
-    }, [data.length, isTokenValid, router, userId]);
-
-    
-    const validateToken = async (token: string) => {
-        try {
-        const { isValid, userId } = await authAPI.validateToken(token);
-
-        if (isValid) {
-            setIsTokenValid(isValid);
-            setAccessToken(token)
-            setUserId(userId);
-            setLoading(false);
-        } else {
-            setIsTokenValid(false);
-        }} catch (error) {
-            message.error("Token inválido.");
-            sessionStorage.removeItem("access_token");
-            router.push("/auth/signin");
-        }
-    };
-
-
-    const fetchRooms = async () => {
-        try {
-            const response = await roomsAPI.getRoomsByUser(userId, accessToken);
-            const rooms = response.map(room => ({ ...room, isEditing: false }));
-            setData(rooms);
-        } catch (error) {
-            message.error("Erro ao buscar cômodos.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleAddItem = () => {
-        const newData = [
-            ...data,
-            { name: newItem, isEditing: true, id: 'newItem' }
-        ];
-
-        setData(newData);
-        setNewItem('');
-    };
-
-    const handleEditItem = (index: number) => {
-        const newData = [...data];
-        newData[index].isEditing = true;
-        setData(newData);
-    };
-
-    const handleSave = async (index: number, newName: string) => {
-        const newData = [...data];
-
-        const { id, userId: roomUserId } = newData[index];
-        if (!roomUserId) {
-            newData[index].name = newName;
-            const room = { name: newData[index].name, description: "" }
-            await roomsAPI.createRoom(room, accessToken, userId);
-            newData[index].isEditing = false;
-        } else {
-            await roomsAPI.updateRoom({ id, name: newName }, accessToken);
-        }
-        fetchRooms()
-    };
-
-    const handleDeleteRoom = async (index: number, id: string) => {
-        await roomsAPI.deleteRoom(id, accessToken);
-        fetchRooms();
-    }
-
-    const handleBlur = (index: number, newName: string) => {
-        handleSave(index, newName);
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number, newName: string) => {
-
-        if (e.key === 'Enter') {
-            handleSave(index, newName);
-        }
-    };
-
-    if (loading) {
-        return (
-            <Layout>
-                <Content style={{ padding: '0 50px', minHeight: '100vh' }}>
-                    <Spin size="large" style={{ marginTop: "50px" }} />
-                </Content>
-            </Layout>
-        );
-    }
-
-    return (
-        <BoardLayout title="Gerenciar espaço">
-            <Card title="Cômodos" extra={<Button onClick={handleAddItem}>Adicionar</Button>}>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item, index) => (
-                        <List.Item key={index} actions={[
-                            (item.userId ?
-                                <div className={styles.cardItemActions}>
-                                    <a key="list-edit" onClick={() => handleEditItem(index)}><EditOutlined /></a>
-                                    <a key="list-delete" onClick={() => handleDeleteRoom(index, item.id)}><DeleteOutlined /></a>
-                                </div>
-                                : '')
-                        ]}>
-                            <List.Item.Meta
-                                avatar={<Avatar shape="circle">{item.name.charAt(0)}</Avatar>}
-                                title={
-                                    item.isEditing ? (
-                                        <Input
-                                            value={item.name}
-                                            onChange={(e) => setData((prev) => {
-                                                const updatedData = [...prev];
-                                                updatedData[index].name = e.target.value;
-                                                return updatedData;
-                                            })}
-                                            onBlur={() => handleBlur(index, item.name)}
-                                            onKeyDown={(e) => handleKeyPress(e, index, item.name)}
-                                        />
-                                    ) : (
-                                        <Link href="/">{item.name}</Link>
-                                    )
-                                }
-                            />
-                        </List.Item>
-                    )}
+            title={
+              item.isEditing ? (
+                <Input
+                  value={item.name}
+                  onChange={(e) => {
+                    const setter = type === "room" ? setRoomsData : setContributorsData;
+                    const updated = [...data];
+                    updated[index].name = e.target.value;
+                    setter(updated);
+                  }}
+                  onBlur={() => handleBlur(index, item.name, type)}
+                  onKeyDown={(e) => handleKeyPress(e, index, item.name, type)}
                 />
-            </Card>
-        </BoardLayout>
+              ) : (
+                <Link href="/">{item.name}</Link>
+              )
+            }
+          />
+        </List.Item>
+      )}
+    />
+  );
+
+  if (loading) {
+    return (
+      <Layout>
+        <Content style={{ padding: "0 50px", minHeight: "100vh" }}>
+          <Spin size="large" style={{ marginTop: "50px" }} />
+        </Content>
+      </Layout>
     );
+  }
+
+  return (
+    <BoardLayout title="Gerenciar espaço">
+      <Card
+        title="Cômodos"
+        style={{ marginBottom: 24 }}
+        extra={<Button onClick={() => handleAdd("room")}>Adicionar</Button>}
+      >
+        {renderEditableList(roomsData, "room")}
+      </Card>
+
+      <Card
+        title="Membros"
+        extra={<Button onClick={() => handleAdd("contributor")}>Adicionar</Button>}
+      >
+        {renderEditableList(contributorsData, "contributor")}
+      </Card>
+    </BoardLayout>
+  );
 };
 
 export default HomePage;

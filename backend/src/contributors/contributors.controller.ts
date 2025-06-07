@@ -26,8 +26,8 @@ export class ContributorsController {
   }
 
   @Get()
-  findAll(): Promise<Contributor[]> {
-    return this.contributorsService.findAll();
+  findAll(@Param('userId') userId: string): Promise<Contributor[]> {
+    return this.contributorsService.findAll(userId);
   }
 
   @Get(':id')

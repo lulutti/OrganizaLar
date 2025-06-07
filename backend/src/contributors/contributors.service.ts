@@ -17,8 +17,8 @@ export class ContributorsService {
     return this.contributorsRepository.save(contributors);
   }
 
-  async findAll(): Promise<Contributor[]> {
-    return this.contributorsRepository.find();
+  async findAll(userId: string): Promise<Contributor[]> {
+    return this.contributorsRepository.find({ where: { userId: userId } });
   }
 
   async findOne(id: string): Promise<Contributor> {
@@ -38,7 +38,8 @@ export class ContributorsService {
   }
 
   async remove(id: string): Promise<void> {
-    const contributors = await this.findOne(id);
-    await this.contributorsRepository.remove(contributors);
+    const contributor = await this.findOne(id);
+
+    await this.contributorsRepository.remove(contributor);
   }
 }

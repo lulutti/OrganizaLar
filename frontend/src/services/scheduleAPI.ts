@@ -1,4 +1,4 @@
-import api from "./api"; // Importa a instância do Axios
+import api from "./api";
 import { Task } from "./tasksApi";
 
 export enum CleaningScheduleStatus {
@@ -14,10 +14,10 @@ export enum ScheduleTaskStatus {
 }
 
 export interface CleaningSchedule {
-    id: string;
-    title: string;
-    status: CleaningScheduleStatus;
-    tasks: CleaningScheduleTask[];
+  id: string;
+  title: string;
+  status: CleaningScheduleStatus;
+  tasks: CleaningScheduleTask[];
 }
 
 export interface CleaningScheduleTask {
@@ -25,10 +25,7 @@ export interface CleaningScheduleTask {
   status: ScheduleTaskStatus;
   completedAt: string | null;
   task: Task;
-  assigned_to?: {
-    id: string;
-    name: string;
-  } | null;
+  assignedContributorId?: string;
 }
 
 export interface CreateCleaningSchedule {
@@ -40,7 +37,8 @@ export interface CreateCleaningSchedule {
 export interface UpdateCleaningScheduleTaskDto {
   cleaningScheduleId?: string;
   taskId: string;
-  newStatus: ScheduleTaskStatus;
+  newStatus?: ScheduleTaskStatus;
+  assignedToContributorId?: string;
 }
 
 export const scheduleAPI = {
@@ -56,10 +54,7 @@ export const scheduleAPI = {
     return response.data;
   },
 
-  findActiveByUser: async (
-    userId: string,
-    accessToken: string
-  ): Promise<CleaningSchedule> => {
+  findActiveByUser: async (userId: string, accessToken: string): Promise<CleaningSchedule> => {
     const response = await api.get(`/cleaning-schedule/active/${userId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

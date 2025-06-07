@@ -12,6 +12,7 @@ import {
   Form,
   InputRef,
   Input,
+  Empty,
 } from "antd";
 import BoardLayout from "@/components/layouts/BoardLayout";
 import { Room, roomsAPI } from "@/services/roomsApi";
@@ -19,7 +20,8 @@ import { authAPI } from "@/services/authAPI";
 import { Task, tasksAPI } from "@/services/tasksApi";
 import React from "react";
 import { DeleteOutlined } from "@ant-design/icons";
-import styles from  "@/styles/TasksPage.module.css";
+import styles from "@/styles/TasksPage.module.css";
+import { stringToColor } from "@/utils/stringToColor.utils";
 
 const { Title } = Typography;
 const { Content } = Layout;
@@ -108,22 +110,17 @@ const TasksPage = () => {
       title: "Última realização",
       dataIndex: "last_time_done",
       key: "last_time_done",
-      render: (date: string | null) =>
-        date ? new Date(date).toLocaleDateString() : "—",
+      render: (date: string | null) => (date ? new Date(date).toLocaleDateString() : "—"),
     },
     {
       title: "Ações",
       key: "action",
       render: (_: any, record: Task) => (
-        <Button
-          danger
-          type="link"
-          onClick={() => handleDeleteTask(record.id)}
-        >
+        <Button danger type="link" onClick={() => handleDeleteTask(record.id)}>
           <DeleteOutlined />
         </Button>
       ),
-    }
+    },
   ];
 
   if (loading) {
@@ -138,7 +135,10 @@ const TasksPage = () => {
 
   const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-  const EditableRow: React.FC<{ index: number; children: React.ReactNode }> = ({ index, ...props }) => {
+  const EditableRow: React.FC<{ index: number; children: React.ReactNode }> = ({
+    index,
+    ...props
+  }) => {
     const [form] = Form.useForm();
     return (
       <Form form={form} component={false}>
@@ -179,7 +179,7 @@ const TasksPage = () => {
         toggleEdit();
         handleSave({ ...record, ...values });
       } catch (errInfo) {
-        console.log('Save failed:', errInfo);
+        console.log("Save failed:", errInfo);
       }
     };
 
@@ -209,9 +209,7 @@ const TasksPage = () => {
       await tasksAPI.updateTask(updatedTask, accessToken);
 
       setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === updatedTask.id ? { ...task, ...updatedTask } : task
-        )
+        prevTasks.map((task) => (task.id === updatedTask.id ? { ...task, ...updatedTask } : task))
       );
 
       message.success("Tarefa atualizada com sucesso.");
@@ -254,41 +252,54 @@ const TasksPage = () => {
 
   return (
     <BoardLayout title="Tarefas">
-      <Collapse accordion>
-        {rooms.map((room) => {
-          const tasksForRoom = tasks.filter(
-            (task) => task?.room?.id === room.id
-          );
+      {rooms.length === 0 ? (
+        <Empty
+          description={
+            <>
+              Nenhum cômodo cadastrado ainda. <br />
+              Para começar, adicione pelo menos um cômodo à sua casa.
+            </>
+          }
+        >
+          <Button type="primary" onClick={() => router.push("/board/home")}>
+            Ir para gerenciamento de cômodos
+          </Button>
+        </Empty>
+      ) : (
+        <Collapse accordion>
+          {rooms.map((room) => {
+            const tasksForRoom = tasks.filter((task) => task?.room?.id === room.id);
 
-          return (
-            <Panel
-              header={room.name}
-              key={room.id}
-              extra={
-                <Button
-                  type="link"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddTask(room.id);
-                  }}
-                >
-                  + Adicionar tarefa
-                </Button>
-              }
-            >
-              <Table
-                components={components}
-                rowClassName={() => "editable-row"}
-                dataSource={tasksForRoom}
-                columns={editableColumns}
-                rowKey="id"
-                pagination={false}
-                locale={{ emptyText: "Nenhuma tarefa cadastrada." }}
-              />
-            </Panel>
-          );
-        })}
-      </Collapse>
+            return (
+              <Panel
+                header={room.name}
+                key={room.id}
+                extra={
+                  <Button
+                    type="link"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddTask(room.id);
+                    }}
+                  >
+                    + Adicionar tarefa
+                  </Button>
+                }
+              >
+                <Table
+                  components={components}
+                  rowClassName={() => "editable-row"}
+                  dataSource={tasksForRoom}
+                  columns={editableColumns}
+                  rowKey="id"
+                  pagination={false}
+                  locale={{ emptyText: "Nenhuma tarefa cadastrada." }}
+                />
+              </Panel>
+            );
+          })}
+        </Collapse>
+      )}
     </BoardLayout>
   );
 };

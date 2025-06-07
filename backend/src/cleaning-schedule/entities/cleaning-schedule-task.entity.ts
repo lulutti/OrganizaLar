@@ -42,7 +42,10 @@ export class CleaningScheduleTask {
   @Column({ type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
-  @ManyToOne(() => Contributor, { nullable: true })
+  @ManyToOne(() => Contributor, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'assignedContributorId' })
   assignedContributor?: Contributor;
 

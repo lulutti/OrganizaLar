@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -12,7 +9,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async signIn(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOneByEmail(email);
@@ -29,6 +26,7 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
+      name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
     };
@@ -56,7 +54,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid secret answer');
     }
 
-    const payload = { sub: user.id, type: 'password_reset' };
+    const payload = { sub: user.id, name: user.name, type: 'password_reset' };
     return {
       access_token: this.jwtService.sign(payload, {
         secret: jwtConstants.secret,
@@ -65,14 +63,17 @@ export class AuthService {
     };
   }
 
-  async validateToken(token: string): Promise<string | null> {
+  async validateToken(
+    token: string,
+  ): Promise<{ userId: string; userName: string } | null> {
     try {
       const decoded = await this.jwtService.verify(token, {
         secret: jwtConstants.secret,
       });
       const userId = decoded.sub;
+      const userName = decoded.name;
 
-      return userId;
+      return { userId, userName };
     } catch (error) {
       console.error(error);
       return null;
